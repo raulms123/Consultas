@@ -1,0 +1,60 @@
+use mydb;
+
+-- todos los luchadores que hayan nacido después de 1985, cuyo peso sea mayor de 60, y que pertenezcan al equipo "Team Gamma".
+
+SELECT * 
+FROM Luchador
+WHERE YEAR(FechaNacimiento) > 1985 
+AND Peso > 60 
+AND Equipo = 'Team Gamma';
+
+-- Luchadores que han cambiado de equipo más de una vez:
+SELECT *
+FROM Luchador
+WHERE Nombre IN (
+    SELECT Nombre
+    FROM (
+        SELECT Nombre, COUNT(DISTINCT Equipo) AS numEquipos
+        FROM Luchador
+        GROUP BY Nombre
+        HAVING numEquipos > 1
+    ) AS subquery
+);
+
+--  encontrar los luchadores con el récord más alto en cada equipo:
+SELECT L1.*
+FROM Luchador L1
+JOIN (
+    SELECT Equipo, MAX(Record) AS MaxRecord
+    FROM Luchador
+    GROUP BY Equipo
+) AS L2 ON L1.Equipo = L2.Equipo AND L1.Record = L2.MaxRecord;
+
+-- contar el número de luchadores por país y luego selecciona solo aquellos países que tienen más de 5 luchadores.
+
+SELECT Nombre, Pais, COUNT(*) AS TotalLuchadores
+FROM Luchador
+GROUP BY Pais
+HAVING TotalLuchadores > 5
+ORDER BY TotalLuchadores DESC;
+
+
+/*selecciona los luchadores nacidos entre 1980 y 1990, cuenta el número de luchadores por país y 
+luego selecciona solo aquellos países que tienen más de 3 luchadores en ese rango de edad y ordena en descenso */
+
+SELECT Nombre, Pais, COUNT(*) AS TotalLuchadores
+FROM Luchador
+WHERE FechaNacimiento BETWEEN '1980-01-01' AND '1990-12-31'
+GROUP BY Pais
+HAVING TotalLuchadores > 3
+ORDER BY TotalLuchadores DESC;
+
+
+
+
+
+
+
+
+
+
