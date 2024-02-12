@@ -8,38 +8,36 @@ WHERE YEAR(FechaNacimiento) > 1985
 AND Peso > 60 
 AND Equipo = 'Team Gamma';
 
--- Luchadores que han cambiado de equipo más de una vez:
-SELECT *
+--  Esta consulta te dará el nombre del luchador, la altura máxima y el equipo al que pertenece el luchador más alto de cada equipo.
+SELECT Equipo, Nombre AS NombreLuchador, Altura AS AlturaMaxima
 FROM Luchador
-WHERE Nombre IN (
-    SELECT Nombre
-    FROM (
-        SELECT Nombre, COUNT(DISTINCT Equipo) AS numEquipos
-        FROM Luchador
-        GROUP BY Nombre
-        HAVING numEquipos > 1
-    ) AS subquery
+WHERE (Equipo, Altura) IN (
+    SELECT Equipo, MAX(Altura) AS AlturaMaxima
+    FROM Luchador
+    GROUP BY Equipo
 );
 
---  encontrar los luchadores con el récord más alto en cada equipo:
-SELECT L1.*
-FROM Luchador L1
-JOIN (
+
+-- Encontrar los luchadores con el récord más alto en cada equipo:
+SELECT L1.Nombre, L1.Record, L1.Equipo
+FROM Luchador AS L1
+WHERE (L1.Equipo, L1.Record) IN (
     SELECT Equipo, MAX(Record) AS MaxRecord
     FROM Luchador
     GROUP BY Equipo
-) AS L2 ON L1.Equipo = L2.Equipo AND L1.Record = L2.MaxRecord;
+);
 
--- contar el número de luchadores por país y luego selecciona solo aquellos países que tienen más de 5 luchadores.
+-- obtener los nombres de los entrenadores con sus respectivas academias, 
+-- junto con el nombre del luchador y el nombre de su título asociado
 
-SELECT Nombre, Pais, COUNT(*) AS TotalLuchadores
-FROM Luchador
-GROUP BY Pais
-HAVING TotalLuchadores > 5
-ORDER BY TotalLuchadores DESC;
+SELECT DISTINCT e.NombreEntrenador, e.Academia, l.Nombre, l.Titulo_NombreTitutlo AS Titulo
+FROM Luchador l
+JOIN Entrenador e ON l.Entrenador_NombreEntrenador = e.NombreEntrenador
+WHERE l.Titulo_NombreTitutlo IS NOT NULL;
 
 
-/*selecciona los luchadores nacidos entre 1980 y 1990, cuenta el número de luchadores por país y 
+
+/*Seleccionamos los luchadores nacidos entre 1980 y 1990,ademas hay que tener en cuenta el número de luchadores por país y 
 luego selecciona solo aquellos países que tienen más de 3 luchadores en ese rango de edad y ordena en descenso */
 
 SELECT Nombre, Pais, COUNT(*) AS TotalLuchadores
